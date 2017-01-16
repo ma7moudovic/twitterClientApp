@@ -17,4 +17,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <fr.castorflex.android.circularprogressbar.CircularProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        app:cpb_color="@color/colorAccent"
+        app:cpb_max_sweep_angle="300"
+        app:cpb_min_sweep_angle="10"
+        app:cpb_rotation_speed="1.0"
+        app:cpb_stroke_width="@dimen/cpb_default_stroke_width"
+        app:cpb_sweep_speed="1.0" />
+
 </RelativeLayout>

@@ -14,8 +14,12 @@ import android.widget.Toast;
 import com.shar2wy.twitterclientapp.R;
 import com.shar2wy.twitterclientapp.RecyclerClickListener;
 import com.shar2wy.twitterclientapp.adapters.TweetsAdapter;
+import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetTweets;
 import com.shar2wy.twitterclientapp.dataModels.Tweet;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
@@ -86,7 +90,25 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onLongClick(View view, int position) {
                 Toast.makeText(ProfileActivity.this,"long clicked : "+position, Toast.LENGTH_SHORT).show();
+
             }
         }));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe
+    public void onGetTweets(EventGetTweets eventGetTweets){
+
     }
 }

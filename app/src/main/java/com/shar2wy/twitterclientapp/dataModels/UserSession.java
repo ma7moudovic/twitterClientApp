@@ -14,6 +14,7 @@ public class UserSession extends RealmObject{
     String AuthSecret;
 
     public UserSession() {
+
     }
 
     public UserSession(long userId, String userName, String AuthToken, String AuthSecret) {
