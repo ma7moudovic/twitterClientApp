@@ -13,9 +13,9 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.shar2wy.twitterclientapp.R;
-import com.shar2wy.twitterclientapp.RecyclerClickListener;
-import com.shar2wy.twitterclientapp.adapters.FollowersAdapter;
+import com.shar2wy.twitterclientapp.adapters.QuickAdapters.FollowersQuickAdapter;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetBearToken;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetFollowers;
 import com.shar2wy.twitterclientapp.dataModels.Follower;
@@ -28,6 +28,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import io.realm.Realm;
 
@@ -36,13 +38,17 @@ import static com.shar2wy.twitterclientapp.activities.ProfileActivity.FOLLOWER_I
 public class FollowersActivity extends AppCompatActivity {
 
     private RecyclerView followersRecyclerView;
-    private FollowersAdapter followersAdapter;
+//    private FollowersAdapter followersAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     ArrayList<Follower> followersList = new ArrayList<>();
+    Set<Follower> followersSet = new HashSet<>();
+
     ApiManager mApiManager;
     Realm realm;
     RealmHelper realmHelper;
     ProgressBar progressBar;
+    String cursor="-1L";
+    FollowersQuickAdapter mFollowersQuickAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,20 +90,28 @@ public class FollowersActivity extends AppCompatActivity {
         followersRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).build());
         mLayoutManager = new LinearLayoutManager(this);
         followersRecyclerView.setLayoutManager(mLayoutManager);
-        followersAdapter = new FollowersAdapter(this,followersList);
-        followersRecyclerView.setAdapter(followersAdapter);
 
-        followersRecyclerView.addOnItemTouchListener(new RecyclerClickListener(this, followersRecyclerView, new RecyclerClickListener.ClickListener() {
+        mFollowersQuickAdapter = new FollowersQuickAdapter(R.layout.item_layout_follower,followersList);
+        mFollowersQuickAdapter.setEnableLoadMore(true);
+        mFollowersQuickAdapter.setOnLoadMoreListener(new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
-            public void onClick(View view, int position) {
-                startActivity(new Intent(FollowersActivity.this,ProfileActivity.class).putExtra(FOLLOWER_ID,followersAdapter.getItem(position).getId()));
+            public void onLoadMoreRequested() {
+                mApiManager.getFollowers(realmHelper.getBearerToken(realm).getAccess_token(),
+                        Twitter.getSessionManager().getActiveSession().getUserId(),
+                        cursor,
+                        true,
+                        true
+                );
             }
+        });
+        mFollowersQuickAdapter.setOnFollowerClickListener(new FollowersQuickAdapter.OnFollowerClickListener() {
+            @Override
+            public void onFollowerClick(Follower follower) {
+                startActivity(new Intent(FollowersActivity.this,ProfileActivity.class).putExtra(FOLLOWER_ID,follower.getId()));
+            }
+        });
 
-            @Override
-            public void onLongClick(View view, int position) {
-                Toast.makeText(FollowersActivity.this,"long clicked : "+position, Toast.LENGTH_SHORT).show();
-            }
-        }));
+        followersRecyclerView.setAdapter(mFollowersQuickAdapter);
 
     }
 
@@ -146,7 +160,9 @@ public class FollowersActivity extends AppCompatActivity {
     public void onGetFollowersSuccess(EventGetFollowers eventGetFollowers){
 
         if(eventGetFollowers.isSuccess()){
-            loadFollowers();
+            cursor=eventGetFollowers.getNext_cursor_str();
+            loadFollowers(eventGetFollowers.getPrevious_cursor_str()=="0");
+
         }else {
             Toast.makeText(this, "fail to get Followers", Toast.LENGTH_SHORT).show();
         }
@@ -169,10 +185,9 @@ public class FollowersActivity extends AppCompatActivity {
         }
         hideProgressBar();
     }
-    private void loadFollowers() {
 
-        followersList.addAll(realmHelper.getFollowers(realm));
-        followersAdapter.notifyDataSetChanged();
+    private void loadFollowers(boolean clear) {
+        mFollowersQuickAdapter.setNewData(realmHelper.getFollowers(realm));
     }
 
     private void showProgressBar(){

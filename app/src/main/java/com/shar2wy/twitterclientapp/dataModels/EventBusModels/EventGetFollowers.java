@@ -8,6 +8,7 @@ public class EventGetFollowers {
 
     String next_cursor_str;
     String previous_cursor_str;
+
     boolean success;
 
     public EventGetFollowers(boolean success,String next_cursor_str, String previous_cursor_str) {
