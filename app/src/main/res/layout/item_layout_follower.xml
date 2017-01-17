@@ -6,14 +6,6 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <ImageView
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:src="@mipmap/ic_launcher"
-        android:id="@+id/follower_image"
-        android:paddingEnd="4dp"
-        android:layout_centerVertical="true"/>
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,4 +30,13 @@
         android:layout_below="@+id/follower_handle"
         android:text="userbio kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
         android:layout_toEndOf="@+id/follower_image"/>
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@mipmap/ic_launcher"
+        android:id="@+id/follower_image"
+        android:paddingEnd="4dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

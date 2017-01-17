@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.shar2wy.twitterclientapp.R;
 import com.shar2wy.twitterclientapp.dataModels.Follower;
 
@@ -45,8 +46,29 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
 
     }
 
+    public Follower getItem(int position){
+        return followersList.get(position);
+    }
+
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        Follower follower = followersList.get(position);
+        String name = follower.getName();
+        String screenName = follower.getScreen_name();
+        String description = follower.getDescription();
+        String imageUrl = follower.getProfile_image_url();
+
+        holder.followerName.setText(name);
+        holder.followerHandle.setText(context.getString(R.string.screen_name_string_holder, screenName));
+
+        if (description != null) {
+            holder.followerBio.setText(description);
+            holder.followerBio.setVisibility(View.VISIBLE);
+        } else {
+            holder.followerBio.setVisibility(View.GONE);
+        }
+
+        Glide.with(context).load(imageUrl).crossFade().into(holder.follwerImage);
 
     }
 

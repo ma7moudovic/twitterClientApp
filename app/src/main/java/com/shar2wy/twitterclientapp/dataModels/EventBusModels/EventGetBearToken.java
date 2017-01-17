@@ -1,13 +1,13 @@
 package com.shar2wy.twitterclientapp.dataModels.EventBusModels;
 
 /**
- * Created by Shar2wy on 16/01/17.
+ * Created by Shar2wy on 17/01/17.
  */
 
-public class EventGetTweets {
+public class EventGetBearToken {
     boolean success;
 
-    public EventGetTweets(boolean success) {
+    public EventGetBearToken(boolean success) {
         this.success = success;
     }
 

@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.shar2wy.twitterclientapp.R;
 import com.shar2wy.twitterclientapp.RecyclerClickListener;
 import com.shar2wy.twitterclientapp.adapters.FollowersAdapter;
+import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetBearToken;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetFollowers;
 import com.shar2wy.twitterclientapp.dataModels.Follower;
 import com.shar2wy.twitterclientapp.utilities.ApiManager;
@@ -29,10 +31,12 @@ import java.util.ArrayList;
 
 import io.realm.Realm;
 
+import static com.shar2wy.twitterclientapp.activities.ProfileActivity.FOLLOWER_ID;
+
 public class FollowersActivity extends AppCompatActivity {
 
     private RecyclerView followersRecyclerView;
-    private RecyclerView.Adapter followersAdapter;
+    private FollowersAdapter followersAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     ArrayList<Follower> followersList = new ArrayList<>();
     ApiManager mApiManager;
@@ -47,23 +51,28 @@ public class FollowersActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setTitle(String.format(getString(R.string.title_activity_followers),"Mahmoud"));
-
+        getSupportActionBar().setTitle(String.format(getString(R.string.title_activity_followers),Twitter.getSessionManager().getActiveSession().getUserName()));
+        Log.d("user",Twitter.getSessionManager().getActiveSession().getUserId()+"");
         initViews();
 
         mApiManager = new ApiManager(FollowersActivity.this);
         realm = Realm.getDefaultInstance();
         realmHelper = RealmHelper.getInstance(this);
 
-        mApiManager.getFollowers(
-                realmHelper.getBearerToken(realm),
-                Twitter.getSessionManager().getActiveSession().getUserId(),
-                null,
-                "-1",
-                null,
-                null,
-                null
-        );
+        if(realmHelper.getBearerToken(realm)==null){
+
+            mApiManager.getBearerToken();
+
+        }else {
+
+            mApiManager.getFollowers(realmHelper.getBearerToken(realm).getAccess_token(),
+                    Twitter.getSessionManager().getActiveSession().getUserId(),
+                    "-1L",
+                    true,
+                    true
+            );
+
+        }
 
         showProgressBar();
     }
@@ -81,7 +90,7 @@ public class FollowersActivity extends AppCompatActivity {
         followersRecyclerView.addOnItemTouchListener(new RecyclerClickListener(this, followersRecyclerView, new RecyclerClickListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                startActivity(new Intent(FollowersActivity.this,ProfileActivity.class));
+                startActivity(new Intent(FollowersActivity.this,ProfileActivity.class).putExtra(FOLLOWER_ID,followersAdapter.getItem(position).getId()));
             }
 
             @Override
@@ -144,19 +153,25 @@ public class FollowersActivity extends AppCompatActivity {
         hideProgressBar();
     }
 
+    @Subscribe
+    public void onGetBearerToken(EventGetBearToken eventGetBearToken){
+
+        if(eventGetBearToken.isSuccess()){
+            mApiManager.getFollowers(
+                    realmHelper.getBearerToken(realm).getAccess_token(),
+                    Twitter.getSessionManager().getActiveSession().getUserId(),
+                    "-1L",
+                    true,
+                    true
+            );
+        }else {
+            Toast.makeText(this, "fail", Toast.LENGTH_SHORT).show();
+        }
+        hideProgressBar();
+    }
     private void loadFollowers() {
 
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-        followersList.add(new Follower());
-
+        followersList.addAll(realmHelper.getFollowers(realm));
         followersAdapter.notifyDataSetChanged();
     }
 
