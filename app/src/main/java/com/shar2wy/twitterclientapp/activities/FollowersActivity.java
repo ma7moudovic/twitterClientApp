@@ -1,7 +1,14 @@
 package com.shar2wy.twitterclientapp.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,14 +17,18 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.shar2wy.twitterclientapp.R;
 import com.shar2wy.twitterclientapp.adapters.QuickAdapters.FollowersQuickAdapter;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetBearToken;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetFollowers;
+import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetUserInfo;
 import com.shar2wy.twitterclientapp.dataModels.Follower;
 import com.shar2wy.twitterclientapp.utilities.ApiManager;
 import com.shar2wy.twitterclientapp.utilities.RealmHelper;
@@ -35,13 +46,12 @@ import io.realm.Realm;
 
 import static com.shar2wy.twitterclientapp.activities.ProfileActivity.FOLLOWER_ID;
 
-public class FollowersActivity extends AppCompatActivity {
+public class FollowersActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener{
 
     private RecyclerView followersRecyclerView;
-//    private FollowersAdapter followersAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     ArrayList<Follower> followersList = new ArrayList<>();
-    Set<Follower> followersSet = new HashSet<>();
 
     ApiManager mApiManager;
     Realm realm;
@@ -49,17 +59,42 @@ public class FollowersActivity extends AppCompatActivity {
     ProgressBar progressBar;
     String cursor="-1L";
     FollowersQuickAdapter mFollowersQuickAdapter;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+
+    Toolbar toolbar;
+    DrawerLayout drawer;
+    ActionBarDrawerToggle toggle;
+    NavigationView navigationView;
+    View headerLayout;
+    TextView followerName;
+    ImageView followerImage, followerCover;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_followers);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setTitle(String.format(getString(R.string.title_activity_followers),Twitter.getSessionManager().getActiveSession().getUserName()));
         Log.d("user",Twitter.getSessionManager().getActiveSession().getUserId()+"");
         initViews();
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        headerLayout = navigationView.getHeaderView(0); // 0-index header
+
+        followerName = (TextView) headerLayout.findViewById(R.id.follower_name);
+//        followerHandle = (TextView) headerLayout.findViewById(R.id.follower_handle);
+
+        followerImage = (ImageView) headerLayout.findViewById(R.id.follower_image);
+        followerCover = (ImageView) headerLayout.findViewById(R.id.follower_cover);
 
         mApiManager = new ApiManager(FollowersActivity.this);
         realm = Realm.getDefaultInstance();
@@ -78,12 +113,44 @@ public class FollowersActivity extends AppCompatActivity {
                     true
             );
 
+            Follower user = realmHelper.getUserInfo(realm,Twitter.getSessionManager().getActiveSession().getUserId());
+            if(user==null){
+                mApiManager.getUserInfo(
+                        realmHelper.getBearerToken(realm).getAccess_token(),
+                        Twitter.getSessionManager().getActiveSession().getUserId()
+                );
+            }else {
+                loadAccountInfo(user);
+            }
         }
 
         showProgressBar();
     }
 
+    private void loadAccountInfo(Follower userInfo) {
+
+        followerName.setText(getString(R.string.screen_name_string_holder,userInfo.getScreen_name()));
+        Glide.with(this).load(userInfo.getProfile_image_url()).crossFade().into(followerImage);
+        Glide.with(this).load(userInfo.getProfile_banner_url()).crossFade().into(followerCover);
+
+    }
+
     private void initViews() {
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.follower_swipe_refresh_layout);
+        mSwipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mApiManager.getFollowers(realmHelper.getBearerToken(realm).getAccess_token(),
+                        Twitter.getSessionManager().getActiveSession().getUserId(),
+                        "-1L",
+                        true,
+                        true
+                );
+            }
+        });
+
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         followersRecyclerView = (RecyclerView) findViewById(R.id.followers_recycler_view);
         followersRecyclerView.setHasFixedSize(true);
@@ -107,7 +174,8 @@ public class FollowersActivity extends AppCompatActivity {
         mFollowersQuickAdapter.setOnFollowerClickListener(new FollowersQuickAdapter.OnFollowerClickListener() {
             @Override
             public void onFollowerClick(Follower follower) {
-                startActivity(new Intent(FollowersActivity.this,ProfileActivity.class).putExtra(FOLLOWER_ID,follower.getId()));
+                startActivity(new Intent(FollowersActivity.this,ProfileActivity.class)
+                        .putExtra(FOLLOWER_ID,follower.getId()));
             }
         });
 
@@ -123,6 +191,16 @@ public class FollowersActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -133,10 +211,10 @@ public class FollowersActivity extends AppCompatActivity {
         if (id == R.id.action_logout) {
             Twitter.getSessionManager().clearActiveSession();
             if(Twitter.getSessionManager().getSessionMap().isEmpty()){
-                Toast.makeText(this,"empty", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this,"empty", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(FollowersActivity.this,LoginActivity.class));
             }else {
-                Toast.makeText(this,"not empty", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this,"not empty", Toast.LENGTH_SHORT).show();
             }
             return true;
         }
@@ -167,6 +245,17 @@ public class FollowersActivity extends AppCompatActivity {
             Toast.makeText(this, "fail to get Followers", Toast.LENGTH_SHORT).show();
         }
         hideProgressBar();
+
+    }
+
+    @Subscribe
+    public void onGetUserInfo(EventGetUserInfo eventGetUserInfo){
+        if(eventGetUserInfo.isSuccess()){
+            Follower userInfo = realmHelper.getUserInfo(realm,Twitter.getSessionManager().getActiveSession().getUserId());
+            loadAccountInfo(userInfo);
+        }else {
+            Toast.makeText(this,getString(R.string.msg_fail_get_user_info), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Subscribe
@@ -179,6 +268,9 @@ public class FollowersActivity extends AppCompatActivity {
                     "-1L",
                     true,
                     true
+            );
+            mApiManager.getUserInfo(realmHelper.getBearerToken(realm).getAccess_token(),
+                    Twitter.getSessionManager().getActiveSession().getUserId()
             );
         }else {
             Toast.makeText(this, "fail", Toast.LENGTH_SHORT).show();
@@ -193,7 +285,51 @@ public class FollowersActivity extends AppCompatActivity {
     private void showProgressBar(){
         progressBar.setVisibility(View.VISIBLE);
     }
+
     private void hideProgressBar(){
         progressBar.setVisibility(View.GONE);
+        if(mSwipeRefreshLayout.isRefreshing()){
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_change_lang) {
+            showchanageLanguageDialog();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
+    private void showchanageLanguageDialog(){
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(getResources().getString(R.string.changelangauge_msg));
+
+        alertDialogBuilder.setPositiveButton(getResources().getString(R.string.changelangauge_msg_yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+
+            }
+        });
+
+        alertDialogBuilder.setNegativeButton(getResources().getString(R.string.changelangauge_msg_no),new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 }

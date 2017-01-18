@@ -81,4 +81,13 @@ public class RealmHelper {
         return realm.where(Tweet.class).findAll();
     }
 
+    public void saveUserInfo(Realm realm, JSONObject userJsonObject) {
+        realm.beginTransaction();
+        realm.createOrUpdateObjectFromJson(Follower.class,userJsonObject);
+        realm.commitTransaction();
+    }
+
+    public Follower getUserInfo(Realm realm,long id){
+        return realm.where(Follower.class).equalTo("id",id).findFirst();
+    }
 }

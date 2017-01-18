@@ -1,7 +1,6 @@
 package com.shar2wy.twitterclientapp.utilities;
 
 import android.content.Context;
-import android.provider.SyncStateContract;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,11 +11,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
-import com.google.gson.JsonArray;
-import com.shar2wy.twitterclientapp.dataModels.BearerToken;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetBearToken;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetFollowers;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetTweets;
+import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetUserInfo;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
@@ -33,7 +31,7 @@ import io.realm.Realm;
 import static com.android.volley.Request.Method.GET;
 import static com.android.volley.Request.Method.POST;
 import static com.shar2wy.twitterclientapp.utilities.UrlHelper.URL_GET_AUTH_TOKEN;
-import static com.shar2wy.twitterclientapp.utilities.UrlHelper.URL_GET_FOLLOWER;
+import static com.shar2wy.twitterclientapp.utilities.UrlHelper.URL_GET_USER_INFO;
 import static com.shar2wy.twitterclientapp.utilities.UrlHelper.URL_GET_FOLLOWERS;
 import static com.shar2wy.twitterclientapp.utilities.UrlHelper.URL_GET_TWEETS;
 
@@ -149,32 +147,21 @@ public class ApiManager {
         addRequest(jsonRequest);
     }
 
-    public void getFollower(final String bearerToken, long userID, String screenName, boolean include_user_entities){
+    public void getUserInfo(final String bearerToken, long userID){
         if(bearerToken==null){
             getBearerToken();
         }
         String paramsInUrl ="?"+
-                "user_id="+userID+
-                "&screen_name="+screenName+
-                "&include_user_entities="+include_user_entities;
-        Log.d("url",URL_GET_FOLLOWER+paramsInUrl);
-        JsonRequest jsonRequest = new JsonObjectRequest(GET,URL_GET_FOLLOWER+paramsInUrl, new Response.Listener<JSONObject>() {
+                "user_id="+userID;
+        Log.d("url", URL_GET_USER_INFO +paramsInUrl);
+        JsonRequest jsonRequest = new JsonObjectRequest(GET, URL_GET_USER_INFO +paramsInUrl, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d("Response", response.toString());
                 Toast.makeText(context,response.toString(), Toast.LENGTH_SHORT).show();
-                String previous_cursor_str = null;
-                String next_cursor_str = null;
-                try {
-//                    next_cursor_str = response.getString("next_cursor_str");
-//                    previous_cursor_str = response.getString("previous_cursor_str");
-                    RealmHelper.getInstance(context).saveFollowers(Realm.getDefaultInstance(),response.getJSONArray("users"));
-//                    EventBus.getDefault().post(new EventGetFollowers(true,next_cursor_str,previous_cursor_str));
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-//                    EventBus.getDefault().post(new EventGetFollowers(false,next_cursor_str,previous_cursor_str));
-                }
+                RealmHelper.getInstance(context).saveUserInfo(Realm.getDefaultInstance(),response);
+                EventBus.getDefault().post(new EventGetUserInfo(true));
 
             }
         }, new Response.ErrorListener() {

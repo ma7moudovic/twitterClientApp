@@ -1,10 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">twitterClientApp</string>
     <string name="action_settings">Settings</string>
-    <string name="action_logout">Logout</string>
+    <string name="action_logout">تسجيل الخروج</string>
 
     <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_followers">Hey %s.</string>
+    <string name="title_activity_followers">اهلا %s.</string>
     <string name="twitter_login_button_text">Login with twitter</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_DispatchActivity">DispatchActivity</string>
@@ -13,14 +14,11 @@
     <string name="quila_name2">Quila!</string>
     <string name="screen_name_string_holder">\@%s</string>
     <string name="tags_text_holder">%s</string>
-    <string name="msg_welcome">Welcome</string>
-    <string name="title_activity_main">MainActivity</string>
-
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="msg_welcome">اهلا</string>
     <string name="msg_fail_get_user_info">Fail to get user info.</string>
-    <string name="action_change_lang">Change Language</string>
-    <string name="changelangauge_msg">Change language to Arabic?</string>
-    <string name="changelangauge_msg_yes">CHANGE LANGUAGE</string>
-    <string name="changelangauge_msg_no">CANCEL</string>
+    <string name="action_change_lang">تغيير اللغة</string>
+    <string name="changelangauge_msg">تغيير اللغة الي الإنجليزية؟</string>
+    <string name="changelangauge_msg_yes">تغيير اللغة‎</string>
+    <string name="changelangauge_msg_no">إلغاء</string>
+
 </resources>

@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.shar2wy.twitterclientapp.R;
 import com.shar2wy.twitterclientapp.dataModels.UserSession;
 import com.shar2wy.twitterclientapp.utilities.ApiManager;
+import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterException;
@@ -23,7 +24,6 @@ public class LoginActivity extends AppCompatActivity {
     private TwitterLoginButton loginButton;
     Realm realm;
     ApiManager mApiManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
