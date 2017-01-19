@@ -5,7 +5,7 @@ package com.shar2wy.twitterclientapp.dataModels.EventBusModels;
  */
 public class EventGetUserInfo {
 
-    boolean success;
+    private boolean success;
 
     public EventGetUserInfo(boolean success) {
         this.success=success;

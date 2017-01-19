@@ -5,7 +5,7 @@ package com.shar2wy.twitterclientapp.dataModels.EventBusModels;
  */
 
 public class EventGetBearToken {
-    boolean success;
+    private boolean success;
 
     public EventGetBearToken(boolean success) {
         this.success = success;

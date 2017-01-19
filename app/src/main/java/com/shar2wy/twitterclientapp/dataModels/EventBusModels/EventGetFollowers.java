@@ -6,10 +6,10 @@ package com.shar2wy.twitterclientapp.dataModels.EventBusModels;
 
 public class EventGetFollowers {
 
-    String next_cursor_str;
-    String previous_cursor_str;
+    private String next_cursor_str;
+    private String previous_cursor_str;
 
-    boolean success;
+    private boolean success;
 
     public EventGetFollowers(boolean success,String next_cursor_str, String previous_cursor_str) {
         this.next_cursor_str = next_cursor_str;

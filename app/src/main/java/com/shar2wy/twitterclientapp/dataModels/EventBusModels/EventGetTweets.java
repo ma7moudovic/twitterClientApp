@@ -5,7 +5,7 @@ package com.shar2wy.twitterclientapp.dataModels.EventBusModels;
  */
 
 public class EventGetTweets {
-    boolean success;
+    private boolean success;
 
     public EventGetTweets(boolean success) {
         this.success = success;

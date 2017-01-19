@@ -18,9 +18,15 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
     <string name="msg_fail_get_user_info">Fail to get user info.</string>
     <string name="action_change_lang">Change Language</string>
     <string name="changelangauge_msg">Change language to Arabic?</string>
     <string name="changelangauge_msg_yes">CHANGE LANGUAGE</string>
     <string name="changelangauge_msg_no">CANCEL</string>
+    <string name="msg_fail_to_login">Fail to login please try again later.</string>
+
+    <string name="dialog_msg_logout">Are you sure you want to logout?</string>
+    <string name="dialog_btn_logout">Logout</string>
+    <string name="dialog_btn_cancel">Cancel</string>
 </resources>

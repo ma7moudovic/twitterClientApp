@@ -5,4 +5,9 @@
         android:id="@+id/nav_change_lang"
         android:icon="@drawable/ic_menu_manage"
         android:title="@string/action_change_lang" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:icon="@drawable/ic_menu_account"
+        android:title="@string/action_logout"/>
 </menu>

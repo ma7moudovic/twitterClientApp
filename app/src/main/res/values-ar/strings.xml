@@ -21,4 +21,11 @@
     <string name="changelangauge_msg_yes">تغيير اللغة‎</string>
     <string name="changelangauge_msg_no">إلغاء</string>
 
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="msg_fail_to_login">حاول مرة تانية.</string>
+    <string name="dialog_msg_logout">هل تريد تسجيل الخروج ؟</string>
+    <string name="dialog_btn_logout">تسجيل الخروج</string>
+    <string name="dialog_btn_cancel">ألغاء</string>
 </resources>

@@ -9,44 +9,27 @@ import io.realm.annotations.PrimaryKey;
 
 public class Tweet extends RealmObject{
 
-    public Integer favorite_count;
-
-    public boolean favorited;
-
-    public String filter_level;
+    private Integer favorite_count;
+    private boolean favorited;
+    private String filter_level;
 
     @PrimaryKey
-    public long id;
-
-    public String id_str;
-
-    public String in_reply_to_screen_name;
-
-    public String in_reply_to_status_id;
-
-    public String in_reply_to_status_id_str;
-
-    public String in_reply_to_user_id_str;
-
-    public String lang;
-
-    public String quoted_status_id;
-
-    public String quoted_status_id_str;
-
-    public Tweet quoted_status;
-
-    public int retweet_count;
-
-    public boolean retweeted;
-
-    public Tweet retweeted_status;
-
-    public String source;
-
-    public String text;
-
-    public boolean truncated;
+    private long id;
+    private String id_str;
+    private String in_reply_to_screen_name;
+    private String in_reply_to_status_id;
+    private String in_reply_to_status_id_str;
+    private String in_reply_to_user_id_str;
+    private String lang;
+    private String quoted_status_id;
+    private String quoted_status_id_str;
+    private Tweet quoted_status;
+    private int retweet_count;
+    private boolean retweeted;
+    private Tweet retweeted_status;
+    private String source;
+    private String text;
+    private boolean truncated;
 
     public Tweet() {
     }

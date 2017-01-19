@@ -41,7 +41,6 @@ public class ProfileActivity extends AppCompatActivity {
     ApiManager mApiManager;
     Realm realm;
     RealmHelper realmHelper;
-    ProgressBar progressBar;
 
     ImageView followerProfile;
     ImageView followerCover;

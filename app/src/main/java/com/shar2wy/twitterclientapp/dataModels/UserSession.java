@@ -8,10 +8,10 @@ import io.realm.RealmObject;
 
 public class UserSession extends RealmObject{
 
-    long UserId;
-    String UserName;
-    String AuthToken;
-    String AuthSecret;
+    private long UserId;
+    private String UserName;
+    private String AuthToken;
+    private String AuthSecret;
 
     public UserSession() {
 

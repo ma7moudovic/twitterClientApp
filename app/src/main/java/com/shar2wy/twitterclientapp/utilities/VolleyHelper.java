@@ -7,9 +7,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
-/**
- * Created by mahmoud on 4/25/15.
- */
 public final class VolleyHelper {
     private static final String TAG = VolleyHelper.class.getSimpleName();
     private static final int MAX_CACHE_SIZE = 1024 * 1024 * 10;

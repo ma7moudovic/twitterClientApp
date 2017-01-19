@@ -24,6 +24,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.shar2wy.twitterclientapp.LocaleHelper;
+import com.shar2wy.twitterclientapp.PrefsManager;
 import com.shar2wy.twitterclientapp.R;
 import com.shar2wy.twitterclientapp.adapters.QuickAdapters.FollowersQuickAdapter;
 import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetBearToken;
@@ -39,9 +41,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 import io.realm.Realm;
 
 import static com.shar2wy.twitterclientapp.activities.ProfileActivity.FOLLOWER_ID;
@@ -184,13 +183,6 @@ public class FollowersActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -200,27 +192,6 @@ public class FollowersActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_logout) {
-            Twitter.getSessionManager().clearActiveSession();
-            if(Twitter.getSessionManager().getSessionMap().isEmpty()){
-//                Toast.makeText(this,"empty", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(FollowersActivity.this,LoginActivity.class));
-            }else {
-//                Toast.makeText(this,"not empty", Toast.LENGTH_SHORT).show();
-            }
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void onStart() {
@@ -301,7 +272,9 @@ public class FollowersActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_change_lang) {
-            showchanageLanguageDialog();
+            showChangeLanguageDialog();
+        }else if(id == R.id.nav_logout){
+            showLogoutWarningDialog();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -310,7 +283,7 @@ public class FollowersActivity extends AppCompatActivity
     }
 
 
-    private void showchanageLanguageDialog(){
+    private void showChangeLanguageDialog(){
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage(getResources().getString(R.string.changelangauge_msg));
@@ -319,6 +292,12 @@ public class FollowersActivity extends AppCompatActivity
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
 
+                if(LocaleHelper.getSelectedLanguage().equalsIgnoreCase(PrefsManager.ARABIC_LOCAL_LANGUAGE)){
+                    LocaleHelper.setSelectedLanguage(PrefsManager.ENGLISH_LOCAL_LANGUAGE,getApplicationContext());
+                }else {
+                    LocaleHelper.setSelectedLanguage(PrefsManager.ARABIC_LOCAL_LANGUAGE,getApplicationContext());
+                }
+                restartApp();
             }
         });
 
@@ -332,4 +311,36 @@ public class FollowersActivity extends AppCompatActivity
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
+
+    private void restartApp() {
+        Intent refresh = new Intent(this, DispatchActivity.class);
+        refresh.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(refresh);
+    }
+
+    private void showLogoutWarningDialog(){
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.dialog_msg_logout).setPositiveButton(R.string.dialog_btn_logout,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Twitter.getSessionManager().clearActiveSession();
+                        if(Twitter.getSessionManager().getSessionMap().isEmpty()){
+//                Toast.makeText(this,"empty", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(FollowersActivity.this,LoginActivity.class));
+                        }else {
+//                Toast.makeText(this,"not empty", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.dialog_btn_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .show();
+    }
+
 }

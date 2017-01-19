@@ -10,9 +10,9 @@ import io.realm.annotations.PrimaryKey;
 public class BearerToken extends RealmObject{
 
     @PrimaryKey
-    String access_token;
+    private String access_token;
 
-    String token_type;
+    private String token_type;
 
     public BearerToken() {
     }
