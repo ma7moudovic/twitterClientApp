@@ -3,7 +3,6 @@ package com.shar2wy.twitterclientapp.utilities;
 import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
@@ -11,10 +10,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
-import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetBearToken;
-import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetFollowers;
-import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetTweets;
-import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetUserInfo;
+import com.shar2wy.twitterclientapp.dataModels.eventBus.EventGetBearToken;
+import com.shar2wy.twitterclientapp.dataModels.eventBus.EventGetFollowers;
+import com.shar2wy.twitterclientapp.dataModels.eventBus.EventGetTweets;
+import com.shar2wy.twitterclientapp.dataModels.eventBus.EventGetUserInfo;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
@@ -41,10 +40,10 @@ import static com.shar2wy.twitterclientapp.utilities.UrlHelper.URL_GET_TWEETS;
 
 public class ApiManager {
 
-    private Context context;
+    private Context mContext;
 
-    public ApiManager(Context context) {
-        this.context = context;
+    public ApiManager(Context mContext) {
+        this.mContext = mContext;
     }
 
     public void getBearerToken() {
@@ -53,8 +52,8 @@ public class ApiManager {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d("Response", response.toString());
-//                Toast.makeText(context,response.toString(), Toast.LENGTH_SHORT).show();
-                RealmHelper.getInstance(context).saveBearerToken(Realm.getDefaultInstance(), response);
+//                Toast.makeText(mContext,response.toString(), Toast.LENGTH_SHORT).show();
+                RealmHelper.getInstance(mContext).saveBearerToken(Realm.getDefaultInstance(), response);
                 EventBus.getDefault().post(new EventGetBearToken(true));
             }
         }, new Response.ErrorListener() {
@@ -62,7 +61,7 @@ public class ApiManager {
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
                 Log.d("Error", error.toString());
-//                Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, error.toString(), Toast.LENGTH_SHORT).show();
                 EventBus.getDefault().post(new EventGetBearToken(false));
             }
         }) {
@@ -108,13 +107,13 @@ public class ApiManager {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d("Response", response.toString());
-//                Toast.makeText(context,response.toString(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext,response.toString(), Toast.LENGTH_SHORT).show();
                 String previous_cursor_str = null;
                 String next_cursor_str = null;
                 try {
                     next_cursor_str = response.getString("next_cursor_str");
                     previous_cursor_str = response.getString("previous_cursor_str");
-                    RealmHelper.getInstance(context).saveFollowers(Realm.getDefaultInstance(), response.getJSONArray("users"));
+                    RealmHelper.getInstance(mContext).saveFollowers(Realm.getDefaultInstance(), response.getJSONArray("users"));
                     EventBus.getDefault().post(new EventGetFollowers(true, next_cursor_str, previous_cursor_str));
 
                 } catch (JSONException e) {
@@ -128,7 +127,7 @@ public class ApiManager {
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
                 Log.d("Error", error.toString());
-//                Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, error.toString(), Toast.LENGTH_SHORT).show();
                 EventBus.getDefault().post(new EventGetFollowers(false, "", ""));
             }
         }) {
@@ -158,9 +157,9 @@ public class ApiManager {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d("Response", response.toString());
-//                Toast.makeText(context, response.toString(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, response.toString(), Toast.LENGTH_SHORT).show();
 
-                RealmHelper.getInstance(context).saveUserInfo(Realm.getDefaultInstance(), response);
+                RealmHelper.getInstance(mContext).saveUserInfo(Realm.getDefaultInstance(), response);
                 EventBus.getDefault().post(new EventGetUserInfo(true));
 
             }
@@ -169,7 +168,7 @@ public class ApiManager {
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
                 Log.d("Error", error.toString());
-//                Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, error.toString(), Toast.LENGTH_SHORT).show();
                 EventBus.getDefault().post(new EventGetFollowers(false, "", ""));
             }
         }) {
@@ -202,9 +201,9 @@ public class ApiManager {
             @Override
             public void onResponse(JSONArray response) {
                 Log.d("Response", response.toString());
-//                Toast.makeText(context,response.toString(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext,response.toString(), Toast.LENGTH_SHORT).show();
 
-                RealmHelper.getInstance(context).saveTweets(Realm.getDefaultInstance(), response);
+                RealmHelper.getInstance(mContext).saveTweets(Realm.getDefaultInstance(), response);
                 EventBus.getDefault().post(new EventGetTweets(true));
 
             }
@@ -213,7 +212,7 @@ public class ApiManager {
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
                 Log.d("Error", error.toString());
-//                Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, error.toString(), Toast.LENGTH_SHORT).show();
                 EventBus.getDefault().post(new EventGetTweets(false));
             }
         }) {
@@ -233,6 +232,6 @@ public class ApiManager {
     }
 
     private void addRequest(JsonRequest jsonRequest) {
-        VolleyHelper.getInstance(context).addToRequestQueue(jsonRequest);
+        VolleyHelper.getInstance(mContext).addToRequestQueue(jsonRequest);
     }
 }

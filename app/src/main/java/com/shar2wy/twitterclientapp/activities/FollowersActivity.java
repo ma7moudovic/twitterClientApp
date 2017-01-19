@@ -15,7 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -28,9 +27,9 @@ import com.shar2wy.twitterclientapp.LocaleHelper;
 import com.shar2wy.twitterclientapp.PrefsManager;
 import com.shar2wy.twitterclientapp.R;
 import com.shar2wy.twitterclientapp.adapters.QuickAdapters.FollowersQuickAdapter;
-import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetBearToken;
-import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetFollowers;
-import com.shar2wy.twitterclientapp.dataModels.EventBusModels.EventGetUserInfo;
+import com.shar2wy.twitterclientapp.dataModels.eventBus.EventGetBearToken;
+import com.shar2wy.twitterclientapp.dataModels.eventBus.EventGetFollowers;
+import com.shar2wy.twitterclientapp.dataModels.eventBus.EventGetUserInfo;
 import com.shar2wy.twitterclientapp.dataModels.Follower;
 import com.shar2wy.twitterclientapp.utilities.ApiManager;
 import com.shar2wy.twitterclientapp.utilities.RealmHelper;
@@ -48,7 +47,7 @@ import static com.shar2wy.twitterclientapp.activities.ProfileActivity.FOLLOWER_I
 public class FollowersActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
-    private RecyclerView followersRecyclerView;
+    private RecyclerView mFollowersRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     ArrayList<Follower> followersList = new ArrayList<>();
 
@@ -63,10 +62,10 @@ public class FollowersActivity extends AppCompatActivity
     Toolbar toolbar;
     DrawerLayout drawer;
     ActionBarDrawerToggle toggle;
-    NavigationView navigationView;
-    View headerLayout;
-    TextView followerName;
-    ImageView followerImage, followerCover;
+    private NavigationView mNavigationView;
+    private View mHeaderLayout;
+    private TextView mFollowerName;
+    private ImageView mFollowerImage, mFollowerCover;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,22 +77,6 @@ public class FollowersActivity extends AppCompatActivity
         getSupportActionBar().setTitle(String.format(getString(R.string.title_activity_followers),Twitter.getSessionManager().getActiveSession().getUserName()));
         Log.d("user",Twitter.getSessionManager().getActiveSession().getUserId()+"");
         initViews();
-
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        headerLayout = navigationView.getHeaderView(0); // 0-index header
-
-        followerName = (TextView) headerLayout.findViewById(R.id.follower_name);
-//        followerHandle = (TextView) headerLayout.findViewById(R.id.follower_handle);
-
-        followerImage = (ImageView) headerLayout.findViewById(R.id.follower_image);
-        followerCover = (ImageView) headerLayout.findViewById(R.id.follower_cover);
 
         mApiManager = new ApiManager(FollowersActivity.this);
         realm = Realm.getDefaultInstance();
@@ -128,13 +111,27 @@ public class FollowersActivity extends AppCompatActivity
 
     private void loadAccountInfo(Follower userInfo) {
 
-        followerName.setText(getString(R.string.screen_name_string_holder,userInfo.getScreen_name()));
-        Glide.with(this).load(userInfo.getProfile_image_url()).crossFade().into(followerImage);
-        Glide.with(this).load(userInfo.getProfile_banner_url()).crossFade().into(followerCover);
+        mFollowerName.setText(getString(R.string.screen_name_string_holder,userInfo.getScreen_name()));
+        Glide.with(this).load(userInfo.getProfile_image_url()).crossFade().into(mFollowerImage);
+        Glide.with(this).load(userInfo.getProfile_banner_url()).crossFade().into(mFollowerCover);
 
     }
 
     private void initViews() {
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mHeaderLayout = mNavigationView.getHeaderView(0); // 0-index header
+
+        mFollowerName = (TextView) mHeaderLayout.findViewById(R.id.follower_name);
+        mFollowerImage = (ImageView) mHeaderLayout.findViewById(R.id.follower_image);
+        mFollowerCover = (ImageView) mHeaderLayout.findViewById(R.id.follower_cover);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.follower_swipe_refresh_layout);
         mSwipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
@@ -151,11 +148,11 @@ public class FollowersActivity extends AppCompatActivity
         });
 
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        followersRecyclerView = (RecyclerView) findViewById(R.id.followers_recycler_view);
-        followersRecyclerView.setHasFixedSize(true);
-        followersRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).build());
+        mFollowersRecyclerView = (RecyclerView) findViewById(R.id.followers_recycler_view);
+        mFollowersRecyclerView.setHasFixedSize(true);
+        mFollowersRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).build());
         mLayoutManager = new LinearLayoutManager(this);
-        followersRecyclerView.setLayoutManager(mLayoutManager);
+        mFollowersRecyclerView.setLayoutManager(mLayoutManager);
 
         mFollowersQuickAdapter = new FollowersQuickAdapter(R.layout.item_layout_follower,followersList);
         mFollowersQuickAdapter.setEnableLoadMore(true);
@@ -178,8 +175,7 @@ public class FollowersActivity extends AppCompatActivity
             }
         });
 
-        followersRecyclerView.setAdapter(mFollowersQuickAdapter);
-
+        mFollowersRecyclerView.setAdapter(mFollowersQuickAdapter);
     }
 
     @Override
@@ -208,9 +204,9 @@ public class FollowersActivity extends AppCompatActivity
     @Subscribe
     public void onGetFollowersSuccess(EventGetFollowers eventGetFollowers){
 
-        if(eventGetFollowers.isSuccess()){
-            cursor=eventGetFollowers.getNext_cursor_str();
-            loadFollowers(eventGetFollowers.getPrevious_cursor_str()=="0");
+        if(eventGetFollowers.ismSuccess()){
+            cursor=eventGetFollowers.getmNextCursor();
+            loadFollowers(eventGetFollowers.getmPreviousCursor()=="0");
 
         }else {
             Toast.makeText(this, "fail to get Followers", Toast.LENGTH_SHORT).show();
@@ -221,7 +217,7 @@ public class FollowersActivity extends AppCompatActivity
 
     @Subscribe
     public void onGetUserInfo(EventGetUserInfo eventGetUserInfo){
-        if(eventGetUserInfo.isSuccess()){
+        if(eventGetUserInfo.ismSuccess()){
             Follower userInfo = realmHelper.getUserInfo(realm,Twitter.getSessionManager().getActiveSession().getUserId());
             loadAccountInfo(userInfo);
         }else {
@@ -232,7 +228,7 @@ public class FollowersActivity extends AppCompatActivity
     @Subscribe
     public void onGetBearerToken(EventGetBearToken eventGetBearToken){
 
-        if(eventGetBearToken.isSuccess()){
+        if(eventGetBearToken.ismSuccess()){
             mApiManager.getFollowers(
                     realmHelper.getBearerToken(realm).getAccess_token(),
                     Twitter.getSessionManager().getActiveSession().getUserId(),
@@ -343,4 +339,11 @@ public class FollowersActivity extends AppCompatActivity
                 .show();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(!realm.isClosed()){
+            realm.close();
+        }
+    }
 }

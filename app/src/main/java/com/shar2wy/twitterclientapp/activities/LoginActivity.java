@@ -10,7 +10,6 @@ import android.widget.Toast;
 import com.shar2wy.twitterclientapp.R;
 import com.shar2wy.twitterclientapp.dataModels.UserSession;
 import com.shar2wy.twitterclientapp.utilities.ApiManager;
-import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterException;
@@ -21,9 +20,10 @@ import io.realm.Realm;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private TwitterLoginButton loginButton;
-    Realm realm;
-    ApiManager mApiManager;
+    private TwitterLoginButton mLoginButton;
+    private Realm mRealm;
+    private ApiManager mApiManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,24 +31,24 @@ public class LoginActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        realm = Realm.getDefaultInstance();
+        mRealm = Realm.getDefaultInstance();
         mApiManager = new ApiManager(this);
 
-        loginButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
-        loginButton.setCallback(new Callback<TwitterSession>() {
+        mLoginButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
+        mLoginButton.setCallback(new Callback<TwitterSession>() {
             @Override
             public void success(Result<TwitterSession> result) {
                 // The TwitterSession is also available through:
                 // Twitter.getInstance().core.getSessionManager().getActiveSession()
                 TwitterSession session = result.data;
 
-                realm.beginTransaction();
-                UserSession userSession = realm.createObject(UserSession.class);
+                mRealm.beginTransaction();
+                UserSession userSession = mRealm.createObject(UserSession.class);
                 userSession.setUserName(session.getUserName());
                 userSession.setUserId(session.getUserId());
                 userSession.setAuthToken(session.getAuthToken().token);
                 userSession.setAuthSecret(session.getAuthToken().secret);
-                realm.commitTransaction();
+                mRealm.commitTransaction();
 
                 mApiManager.getBearerToken();
                 startActivity(new Intent(LoginActivity.this,FollowersActivity.class));
@@ -65,8 +65,16 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // Make sure that the loginButton hears the result from any
+        // Make sure that the mLoginButton hears the result from any
         // Activity that it triggered.
-        loginButton.onActivityResult(requestCode, resultCode, data);
+        mLoginButton.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(!mRealm.isClosed()){
+            mRealm.close();
+        }
     }
 }

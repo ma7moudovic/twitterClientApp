@@ -9,11 +9,9 @@ import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shar2wy.twitterclientapp.R;
-import com.shar2wy.twitterclientapp.activities.ProfileActivity;
 import com.shar2wy.twitterclientapp.dataModels.Tweet;
 
 import java.util.ArrayList;
@@ -26,13 +24,13 @@ import java.util.regex.Pattern;
 
 public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder> {
 
-    ArrayList<Tweet> tweetsList = new ArrayList<>();
-    Context context;
+    private ArrayList<Tweet> mTweetsList = new ArrayList<>();
+    private Context mContext;
     private static final Pattern PATTERN = Pattern.compile("#\\w+");
 
     public TweetsAdapter(Context context, ArrayList<Tweet> tweetsList) {
-        this.context=context;
-        this.tweetsList=tweetsList;
+        this.mContext =context;
+        this.mTweetsList=tweetsList;
     }
 
     @Override
@@ -45,7 +43,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        SpannableStringBuilder tweetBodyText = highlightPattern(tweetsList.get(position).getText(), PATTERN);
+        SpannableStringBuilder tweetBodyText = highlightPattern(mTweetsList.get(position).getText(), PATTERN);
         holder.tweetBody.setText(tweetBodyText);
 //        holder.tweetBody.setText(tweetsList.get(position).getText());
         holder.tweetStatus.setText("");
@@ -54,7 +52,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return tweetsList.size();
+        return mTweetsList.size();
     }
 
     private SpannableStringBuilder highlightPattern(String text, Pattern pattern) {
@@ -65,7 +63,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             int end = matcher.end();
 
             spannableStringBuilder.setSpan(new ForegroundColorSpan(ContextCompat.getColor
-                    (context, R.color.colorPrimary)), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    (mContext, R.color.colorPrimary)), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         return spannableStringBuilder;
     }
