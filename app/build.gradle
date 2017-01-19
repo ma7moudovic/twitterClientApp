@@ -16,10 +16,6 @@ repositories {
 apply plugin: 'realm-android'
 apply plugin: 'io.fabric'
 
-//repositories {
-//    maven { url 'https://maven.fabric.io/public' }
-//}
-
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.1"
